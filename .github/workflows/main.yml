@@ -16,7 +16,7 @@ jobs:
 
       - name: Download the file
         run: |
-          wget "https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso" -O downloaded.bin
+          wget "https://swcdn.apple.com/content/downloads/40/56/122-28067-A_9B4FJ1TL06/zchwyidn8ubxkpelhytzb05o418bchr2se/InstallAssistant.pkg" -O downloaded.bin
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
