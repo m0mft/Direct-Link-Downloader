@@ -16,10 +16,10 @@ jobs:
 
       - name: Download the file
         run: |
-          wget "https://packages.openvpn.net/connect/v3/openvpn-connect-3.8.1.5790_signed.dmg" -O downloaded.bin
+          wget "https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso" -O downloaded.bin
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openvpn-connect
+          name: Download-file
           path: downloaded.bin
