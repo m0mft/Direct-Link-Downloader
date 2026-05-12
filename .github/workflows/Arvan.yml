@@ -1,4 +1,4 @@
-name: Arvan File Downloader (Release)
+name: Arvan File Downloader
 
 permissions:
   contents: write  # REQUIRED to create and upload GitHub Releases
@@ -147,17 +147,12 @@ jobs:
             - **RAR Split Volume:** ${{ inputs.rar_split_size || 'N/A' }}
           files: release_upload/*
 
-      - name: Configure AWS Credentials for ArvanCloud
-        if: ${{ github.event.inputs.upload_target == 'arvancloud-s3' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.ARVANCLOUD_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.ARVANCLOUD_SECRET_KEY }}
-          aws-region: default # ArvanCloud uses default region
-
       - name: Upload to ArvanCloud S3
         if: ${{ github.event.inputs.upload_target == 'arvancloud-s3' }}
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ARVANCLOUD_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ARVANCLOUD_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1 # Required by AWS CLI, acts as a dummy value here
           ENDPOINT_URL: ${{ github.event.inputs.arvancloud_endpoint }}
           BUCKET_NAME: ${{ github.event.inputs.arvancloud_bucket }}
         run: |
