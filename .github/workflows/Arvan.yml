@@ -147,21 +147,25 @@ jobs:
             - **RAR Split Volume:** ${{ inputs.rar_split_size || 'N/A' }}
           files: release_upload/*
 
-      - name: Upload to ArvanCloud S3
+      - name: Install Rclone
+        if: ${{ github.event.inputs.upload_target == 'arvancloud-s3' }}
+        run: sudo -v ; curl https://rclone.org/install.sh | sudo bash
+
+      - name: Upload to ArvanCloud S3 (Fast via Rclone)
         if: ${{ github.event.inputs.upload_target == 'arvancloud-s3' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.ARVANCLOUD_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ARVANCLOUD_SECRET_KEY }}
-          AWS_DEFAULT_REGION: us-east-1 
-          ENDPOINT_URL: ${{ github.event.inputs.arvancloud_endpoint }}
-          BUCKET_NAME: ${{ github.event.inputs.arvancloud_bucket }}
+          ENDPOINT: ${{ github.event.inputs.arvancloud_endpoint }}
+          BUCKET: ${{ github.event.inputs.arvancloud_bucket }}
         run: |
-          # Fix S3-compatible multipart and signature errors
-          aws configure set default.s3.signature_version s3v4
-          aws configure set default.s3.addressing_style path
-          aws configure set default.s3.multipart_threshold 512MB
-          aws configure set default.s3.multipart_chunksize 512MB
-          
-          aws s3 cp release_upload/ s3://$BUCKET_NAME/downloads/run-${{ github.run_id }}/ \
-            --recursive \
-            --endpoint-url $ENDPOINT_URL
+          rclone copy release_upload/ :s3:$BUCKET/downloads/run-${{ github.run_id }}/ \
+            --s3-provider="Other" \
+            --s3-env-auth=true \
+            --s3-endpoint="$ENDPOINT" \
+            --s3-region="us-east-1" \
+            --s3-chunk-size=10M \
+            --s3-upload-concurrency=8 \
+            --transfers=8 \
+            --stats-one-line \
+            --stats=5s
